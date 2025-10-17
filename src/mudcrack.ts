@@ -1,75 +1,68 @@
-type GenericObject = Record<string, any>;
 type StringKeysAndValuesOnly<T> = {
 	[P in keyof T as T[P] extends string | undefined ? (P extends string ? P : never) : never]: T[P];
 };
+type AutocompleteString<T extends string> = T | (string & {});
 
-type TagName = keyof HTMLElementTagNameMap;
-type DivByDefault<T> = T extends TagName ? HTMLElementTagNameMap[T] : HTMLDivElement;
-
-type Contents = {
-	textContent: string
-} | {
-	children: HTMLElement[]
-} | {};
+type TagName = AutocompleteString<keyof HTMLElementTagNameMap>;
+type MappedElement<T> = T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] : Element;
+type MappedEvent<T> = T extends keyof HTMLElementEventMap ? HTMLElementEventMap[T] : Event;
 
 export type CSSProperties = StringKeysAndValuesOnly<Partial<CSSStyleDeclaration>>;
 
-type EventsRecord<E> =
-	Partial<
-		Record<
-			keyof HTMLElementEventMap,
-			(
-				event: Event,
-				element: DivByDefault<E>
-			) => void
-		>
-	>;
-
-type BuildOptions<E> = Partial<{
-	elementName: E,
-	attributes: GenericObject,
-	className: string,
-	style: CSSProperties,
-	children: HTMLElement[],
-	textContent: string,
-	events: EventsRecord<E>,
-} & Contents>;
-
-function typedKeys<T extends Record<any, any>>(value: T): (keyof T)[]{
-	return Object.keys(value);
+type EventsRecord<E> = {
+	[K in keyof HTMLElementEventMap]?: (event: MappedEvent<K>, element: E) => void
 }
 
-export function mudcrack<ElementType extends TagName | undefined>
-	({
-		elementName,
+type BuildOptions<E> = Partial<{
+	tagName: E,
+	elementOptions: ElementCreationOptions,
+	attributes: Record<string, string>,
+	className: string,
+	style: CSSProperties,
+	events: EventsRecord<MappedElement<E>>,
+	contents: string | Element[]
+}>;
+
+export function mudcrack<ElementType extends TagName | undefined> (
+	{
+		tagName,
+		elementOptions,
 		attributes,
 		className,
 		style,
-		children,
-		textContent,
 		events,
-	}: BuildOptions<ElementType> = {}): DivByDefault<ElementType> {
-	const el = document.createElement((elementName ?? "div") as TagName) as DivByDefault<ElementType>;
+		contents
+	}: BuildOptions<ElementType> = {}
+): MappedElement<ElementType> {
+	const el = document.createElement(tagName ?? "div", elementOptions) as MappedElement<ElementType>;
 
 	if (className) el.className = className;
-	if (children)
-		el.append(...children);
-	else if (textContent)
-		el.textContent = textContent;
-	if (style)
+
+	if (typeof contents === "string")
+		el.textContent = contents;
+	else if (Array.isArray(contents))
+		el.append(...contents);
+
+	if (style && "style" in el)
 		for (const styleKey of typedKeys(style)){
-			if (styleKey.includes("-"))
+			// if (styleKey.includes("-"))
 				el.style.setProperty(styleKey, style[styleKey] ?? null);
-			else
-				el.style[styleKey] = style[styleKey] ?? "";
+			// else
+			// 	el.style[styleKey] = style[styleKey] ?? "";
 		}
 	if (attributes)
 		for (const attributeKey of Object.keys(attributes))
-			el.setAttribute(attributeKey, attributes[attributeKey]);
+			el.setAttribute(attributeKey, attributes[attributeKey]!);
 
 	if (events)
-		for (const eventKey of typedKeys(events))
-			el.addEventListener(eventKey, e => events[eventKey]!(e, el));
+		for (const eventKey of typedKeys(events)) {
+			// @ts-ignore
+			el.addEventListener(eventKey, e => events[eventKey](e, el));
+		}
 
 	return el;
+}
+
+function typedKeys<T extends object>(value: T): (keyof T)[] {
+	return Object.keys(value) as (keyof T)[];
 }

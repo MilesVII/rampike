@@ -12,5 +12,22 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "description": "non-reactive typed JS framework",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MilesVII/rampike.git"
+  },
+  "keywords": [
+    "vanilla",
+    "non-reactive",
+    "utility"
+  ],
+  "author": "milesseventh",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/MilesVII/rampike/issues"
+  },
+  "homepage": "https://github.com/MilesVII/rampike#readme"
 }

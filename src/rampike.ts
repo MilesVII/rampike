@@ -4,31 +4,34 @@ export type Rampike<Root, Params> = Root & {
 		params: Params,
 		render: () => void
 	}
+};
+
+type RampikeOptions = {
+	skipInitialRender: boolean
+};
+const defaultOptions: RampikeOptions = {
+	skipInitialRender: false
 }
 
 export function rampike<Root, Params>(
-	root: Root,
+	source: Root,
 	params: Params,
-	render: (params: Params, root: Rampike<Root, Params>) => void
+	render: (params: Params, root: Rampike<Root, Params>) => void,
+	options?: Partial<RampikeOptions>
 ) {
-	const _root = root as Rampike<Root, Params>;
-	_root.rampike = {
-		params,
-		render: () => render(_root.rampike.params, _root)
+	const {
+		skipInitialRender
+	} = {
+		...defaultOptions,
+		...options
 	};
-	_root.rampike.render();
 
-	return _root;
-}
+	const root = source as Rampike<Root, Params>;
+	root.rampike = {
+		params,
+		render: () => render(root.rampike.params, root)
+	};
+	if (!skipInitialRender) root.rampike.render();
 
-export function fromTemplate<T extends Element>(template: HTMLTemplateElement) {
-	const contents = template.content.cloneNode(true);
-	const roots: unknown[] = [];
-	contents.childNodes.forEach(node => {
-		if (node.nodeType === Node.ELEMENT_NODE)
-			roots.push(node as unknown);
-	});
-	if (roots.length < 1) throw new Error("provided template has no elements");
-
-	return roots[0] as T;
+	return root;
 }
