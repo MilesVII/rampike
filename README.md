@@ -1,5 +1,6 @@
 # rampike
 *Non-reactive vanilla typed JS framework*
+
 Actually, a `document.createElement()` wrapper bundled with utilities for attaching objects to elements and cloning elements from templates
 
 ## Features and usage
