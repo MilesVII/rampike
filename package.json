@@ -1,6 +1,6 @@
 {
   "name": "rampike",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "scripts": {
     "build": "tsup src/index.ts"
@@ -13,7 +13,7 @@
   "peerDependencies": {
     "typescript": "^5"
   },
-  "description": "non-reactive typed JS framework",
+  "description": "non-reactive vanilla typed JS framework",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
