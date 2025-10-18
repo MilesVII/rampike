@@ -1,4 +1,8 @@
-# ![rampike logo](https://github.com/milesvii/rampike/blob/master/logo.svg?raw=true) rampike
+<p align="center">
+	<img width="180" src="https://github.com/milesvii/rampike/blob/master/logo.svg?raw=true" alt="rampike logo">
+</p>
+
+# rampike
 
 *Non-reactive vanilla typed JS framework*
 
