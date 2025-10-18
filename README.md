@@ -72,18 +72,18 @@ document.body.append(remove);
 ```ts
 document.body.append(
 	mudcrack({
-		elementName: "div",
+		tagName: "div",
 		className: "device-ritual-description",
-		textContent: ritual.desc
+		contents: ritual.desc
 	}),
 	mudcrack({
-		elementName: "div",
-		textContent: `every ${ritual.days} days`
+		tagName: "div",
+		contents: `every ${ritual.days} days`
 	}),
 	mudcrack({
-		elementName: "button",
+		tagName: "button",
 		className: "strip-defaults butt-on",
-		textContent: "remove",
+		contents: "remove",
 		events: {
 			"click": removeCB
 		}
