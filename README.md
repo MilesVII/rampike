@@ -1,7 +1,10 @@
 # rampike
+![rampike logo](https://github.com/milesvii/rampike/blob/master/logo.svg?raw=true)
 *Non-reactive vanilla typed JS framework*
 
 Actually, a `document.createElement()` wrapper bundled with utilities for attaching objects to elements and cloning elements from templates
+
+No dependencies btw
 
 ## Features and usage
 
