@@ -118,6 +118,9 @@ const [title, body] = fromTemplateAll(template);
 ## Reference
 All functions are fully typed and self-documented, please consult the sources for other details
 
+## Credits
+[The tree clipart used as reference](https://creazilla.com/media/clipart/15591080/dead-tree)
+
 ## Yapping
 Reactive frameworks were a mistake. Reactivity is effective for state management when used with libraries like [Jotai](https://jotai.org/), but delegating updating the DOM to a big black box leads to unnecessary complexity which leads to bugs and even performance issues. It **is** faster to develop that way and thus it is commercially effective to use frameworks like Vue or React, but it's not fun and requires advanced expertise with specific frameworks instead of more general skills and knowledge
 
