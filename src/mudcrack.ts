@@ -45,10 +45,10 @@ export function mudcrack<ElementType extends TagName | undefined> (
 
 	if (style && "style" in el)
 		for (const styleKey of typedKeys(style)){
-			// if (styleKey.includes("-"))
+			if (styleKey.includes("-"))
 				el.style.setProperty(styleKey, style[styleKey] ?? null);
-			// else
-			// 	el.style[styleKey] = style[styleKey] ?? "";
+			else
+				el.style[styleKey] = style[styleKey] ?? "";
 		}
 	if (attributes)
 		for (const attributeKey of Object.keys(attributes))
