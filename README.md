@@ -106,6 +106,18 @@ type Params = {
 
 All parameters are optional. `tagName` is `div` by default
 
+### soilborne
+Same as `mudcrack`, but takes an already created element, overwriting specified properties
+```ts
+type Params = {
+	attributes: Record<string, string>,
+	className: string,
+	style: CSSRecord,
+	events: EventsRecord,
+	contents: string | Element[], // either textContent value or children
+}
+```
+
 ### fromTemplateFirst and fromTemplateAll
 Helpers for cloning element nodes from `template` element, [see MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template)
 
