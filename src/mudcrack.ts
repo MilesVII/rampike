@@ -73,7 +73,7 @@ export function soilborne<T extends KnownElements | Element>(
 	if (events)
 		for (const eventKey of typedKeys(events)) {
 			// @ts-ignore
-			source.addEventListener(eventKey, e => events[eventKey](e, el));
+			source.addEventListener(eventKey, e => events[eventKey](e, source));
 		}
 
 	return source;
