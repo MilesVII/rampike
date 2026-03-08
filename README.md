@@ -108,14 +108,12 @@ All parameters are optional. `tagName` is `div` by default
 
 ### soilborne
 Same as `mudcrack`, but takes an already created element, overwriting specified properties
+
+### sirocco
+Generic version of `rampike()`. Simply attaches a value to an object while updating the type
 ```ts
-type Params = {
-	attributes: Record<string, string>,
-	className: string,
-	style: CSSRecord,
-	events: EventsRecord,
-	contents: string | Element[], // either textContent value or children
-}
+const augmented = sirocco([0], 0, "map");
+console.log(typeof augmented.map); // number
 ```
 
 ### fromTemplateFirst and fromTemplateAll
