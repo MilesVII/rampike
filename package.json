@@ -1,13 +1,10 @@
 {
   "name": "rampike",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": false,
   "type": "module",
   "exports": {
     ".": {
-      "main": "./dist/index.cjs",
-      "types": "./dist/index.d.ts",
-      "module": "./dist/index.js",
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -18,20 +15,22 @@
       }
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "files": ["dist"],
   "scripts": {
-    "build": "tsup src/index.ts"
+    "build": "tsup src/index.ts",
+    "test": "bun test && tsc --noEmit"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^20.14.5",
     "@types/bun": "latest",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3"
   },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
   "description": "non-reactive vanilla typed JS framework",
-  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MilesVII/rampike.git"

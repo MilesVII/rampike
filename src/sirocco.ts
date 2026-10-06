@@ -1,4 +1,5 @@
-export type Sirocco<Root, T, FieldName extends string> = Omit<Root, FieldName> & { [K in FieldName]: T }
+export type Sirocco<Root, T, FieldName extends string> =
+	(FieldName extends keyof Root ? Omit<Root, FieldName> : Root) & { [K in FieldName]: T };
 
 export function sirocco<Root, T, FieldName extends string = "rampike">(
 	source: Root,

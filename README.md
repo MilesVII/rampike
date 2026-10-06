@@ -29,7 +29,7 @@ const props = {
 const rampikeElement = rampike(
 	element, props,
 	(params, root) => {
-	root.textContent = `${params.value} ${params.counter}`;
+	root.textContent = `${params.caption} ${params.counter}`;
 });
 // rampikeElement can be put into DOM directly
 document.body.append(rampikeElement);
@@ -96,18 +96,24 @@ Available parameters:
 type Params = {
 	tagName: E,
 	elementOptions: ElementCreationOptions,
-	attributes: Record<string, string>,
+	// null removes the attribute, undefined leaves it as is
+	attributes: Record<string, string | number | null | undefined>,
 	className: string,
-	style: CSSRecord,
+	// camelCase properties, kebab-case properties and custom properties like "--accent"
+	style: CSSProperties,
+	// handlers get (event, element)
 	events: EventsRecord,
-	contents: string | Element[], // either textContent value or children
+	// aborting it removes all listeners added via `events`
+	signal: AbortSignal,
+	// either textContent value or children; null, undefined and false children are skipped
+	contents: string | (Node | string | null | undefined | false)[],
 }
 ```
 
 All parameters are optional. `tagName` is `div` by default
 
 ### soilborne
-Same as `mudcrack`, but takes an already created element, overwriting specified properties
+Same as `mudcrack`, but takes an already created element, overwriting specified properties (`contents` replaces existing children)
 
 ### sirocco
 Generic version of `rampike()`. Simply attaches a value to an object while updating the type
@@ -124,6 +130,49 @@ const template = document.querySelector<HTMLTemplateElement>("template#template-
 const element = fromTemplateFirst(template);
 const [title, body] = fromTemplateAll(template);
 ```
+
+```ts
+import itemHtml from "./item.html?raw"; // or any other way to get html as a string
+
+const itemTemplate = htmlTemplate(itemHtml); // module level, parsed once
+const item = fromTemplateFirst(itemTemplate);
+```
+
+### tentacles
+`tentacles` collects `[data-ref]` elements into a typed record, searching the given roots and their descendants. It throws if a ref is missing or has an unexpected type; if a name occurs more than once, the first one in document order wins
+
+```ts
+const refs = tentacles(document, ["title", "body"]); // Record<"title" | "body", HTMLElement>
+const typed = tentacles(form, { name: HTMLInputElement, icon: SVGSVGElement }); // checked with instanceof
+```
+
+### sprout 
+
+`sprout` clones every root element of a template and collects its refs in one go
+
+```html
+<li data-ref="item">
+	<span data-ref="title"></span>
+	<button data-ref="remove">remove</button>
+</li>
+```
+
+```ts
+const itemTemplate = htmlTemplate(itemHtml);
+
+function itemView(item: Item) {
+	const { root, roots, refs } = sprout(itemTemplate, {
+		item: HTMLLIElement,
+		title: HTMLSpanElement,
+		remove: HTMLButtonElement
+	});
+	refs.title.textContent = item.title;
+	soilborne(refs.remove, { events: { click: () => removeItem(item) } });
+	return root; // first root element; `roots` has all of them
+}
+```
+
+Refs of nested views are visible too, so give them distinct names if one template is inserted into another before collecting
 
 ## Reference
 All functions are fully typed and self-documented, please consult the sources for other details

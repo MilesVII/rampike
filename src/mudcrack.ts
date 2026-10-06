@@ -4,15 +4,26 @@ type StringKeysAndValuesOnly<T> = {
 type AutocompleteString<T extends string> = T | (string & {});
 
 type TagName = AutocompleteString<keyof HTMLElementTagNameMap>;
-type MappedElement<T> = T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] : Element;
+// no tagName means "div"; unknown tag names (custom elements) are still HTMLElements in an HTML document
+type MappedElement<T> =
+	T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] :
+	T extends undefined ? HTMLDivElement :
+	HTMLElement;
 type MappedEvent<T> = T extends keyof HTMLElementEventMap ? HTMLElementEventMap[T] : Event;
-type KnownElements = HTMLElementTagNameMap[keyof HTMLElementTagNameMap];
 
-export type CSSProperties = StringKeysAndValuesOnly<Partial<CSSStyleDeclaration>>;
+export type CSSProperties =
+	StringKeysAndValuesOnly<Partial<CSSStyleDeclaration>> &
+	{ [K in `--${string}`]?: string };
+
+// null removes the attribute, undefined leaves it untouched
+export type AttributeValue = string | number | null | undefined;
+
+// null, undefined and false are skipped, so `condition && element` works
+export type Child = Node | string | null | undefined | false;
 
 type EventsRecord<E> = {
 	[K in keyof HTMLElementEventMap]?: (event: MappedEvent<K>, element: E) => void
-}
+};
 
 type Source<T> = Partial<{
 	tagName: T
@@ -20,17 +31,19 @@ type Source<T> = Partial<{
 }>;
 
 type BuildOptions<E> = Partial<{
-	attributes: Record<string, string>,
+	attributes: Record<string, AttributeValue>,
 	className: string,
 	style: CSSProperties,
 	events: EventsRecord<E>,
-	contents: string | Element[]
+	// aborting the signal removes all listeners added from `events`
+	signal: AbortSignal,
+	contents: string | readonly Child[]
 }>;
 
 type MudcrackOptions<E> = BuildOptions<MappedElement<E>> & Source<E>;
 
 export function mudcrack<
-	ElementType extends TagName | undefined
+	ElementType extends TagName | undefined = undefined
 > (
 	options: MudcrackOptions<ElementType> = {}
 ): MappedElement<ElementType> {
@@ -42,41 +55,54 @@ export function mudcrack<
 	return soilborne(el, options);
 }
 
-export function soilborne<T extends KnownElements | Element>(
+export function soilborne<T extends Element>(
 	source: T,
 	{
 		attributes,
 		className,
 		style,
 		events,
+		signal,
 		contents
 	}: BuildOptions<T> = {}
 ) {
-	if (className) source.className = className;
+	if (className !== undefined) source.className = className;
 
 	if (typeof contents === "string")
 		source.textContent = contents;
-	else if (Array.isArray(contents))
-		source.append(...contents);
+	else if (contents)
+		source.replaceChildren(...contents.filter(isChild));
 
-	if (style && "style" in source)
-		for (const styleKey of typedKeys(style)){
+	if (style && "style" in source) {
+		const declaration = (source as unknown as ElementCSSInlineStyle).style;
+		for (const [styleKey, value] of Object.entries(style)) {
 			if (styleKey.includes("-"))
-				source.style.setProperty(styleKey, style[styleKey] ?? null);
+				declaration.setProperty(styleKey, value ?? null);
 			else
-				source.style[styleKey] = style[styleKey] ?? "";
+				(declaration as unknown as Record<string, string>)[styleKey] = value ?? "";
 		}
+	}
+
 	if (attributes)
-		for (const attributeKey of Object.keys(attributes))
-			source.setAttribute(attributeKey, attributes[attributeKey]!);
+		for (const [attributeKey, value] of Object.entries(attributes)) {
+			if (value === null)
+				source.removeAttribute(attributeKey);
+			else if (value !== undefined)
+				source.setAttribute(attributeKey, String(value));
+		}
 
 	if (events)
 		for (const eventKey of typedKeys(events)) {
-			// @ts-ignore
-			source.addEventListener(eventKey, e => events[eventKey](e, source));
+			const handler = events[eventKey] as ((event: Event, element: T) => void) | undefined;
+			if (handler)
+				source.addEventListener(eventKey, e => handler(e, source), { signal });
 		}
 
 	return source;
+}
+
+function isChild(child: Child): child is Node | string {
+	return child !== null && child !== undefined && child !== false;
 }
 
 function typedKeys<T extends object>(value: T): (keyof T)[] {
